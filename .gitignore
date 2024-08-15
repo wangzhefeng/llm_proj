@@ -166,3 +166,4 @@ cython_debug/
 # ---------------------
 .vscode/
 dataset/
+downloaded_models/
