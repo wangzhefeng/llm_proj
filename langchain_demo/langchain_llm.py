@@ -30,7 +30,7 @@ llm = OpenAI()
 chat_model = ChatOpenAI()
 
 
-# tempalte
+# template
 text = "给生产杯子的公司取一个名字。"
 message = [HumanMessage(content = text)]
 

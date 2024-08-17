@@ -40,14 +40,16 @@ class LLaMA3_1_LLM(LLM):
         print("正在从本地加载模型...")
         # tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
-            model_name_or_path, 
-            use_fast = False
+            model_name_or_path,
+            use_fast = False,
+            # trust_remote_code = True,
         )
         # model
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_name_or_path, 
-            torch_dtype = torch.bfloat16, 
-            device_map="auto"
+            model_name_or_path,
+            torch_dtype = torch.bfloat16,
+            device_map="auto",
+            # trust_remote_code = True,
         )
         self.tokenizer.pad_token = self.tokenizer.eos_token
         print("完成本地模型的加载")
@@ -73,13 +75,21 @@ class LLaMA3_1_LLM(LLM):
             add_generation_prompt = True
         )
         model_inputs = self.tokenizer(
-            [input_ids],
-            return_tensors = "pt",
+            [input_ids], 
+            return_tensors = "pt"
         ).to(self.model.device)
-        print(self.model.device)
-        generated_ids = self.model.generate(model_inputs.input_ids, max_new_tokens = 512)
-        generated_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)]
-        response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens = True)[0]
+        generated_ids = self.model.generate(
+            model_inputs.input_ids, 
+            max_new_tokens = 512
+        )
+        generated_ids = [
+            output_ids[len(input_ids):] 
+            for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+        ]
+        response = self.tokenizer.batch_decode(
+            generated_ids, 
+            skip_special_tokens = True
+        )[0]
         
         return response
 
