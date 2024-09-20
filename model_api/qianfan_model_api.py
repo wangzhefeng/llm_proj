@@ -22,8 +22,6 @@ import qianfan
 from dotenv import load_dotenv, find_dotenv
 
 # 读取本地/项目的环境变量
-# find_dotenv(): 寻找并定位 `.env` 文件的路基那个
-# load_dotenv(): 读取 `.env` 文件，并将其中的环境变量加载到当前的运行环境中，如果设置的是环境变量，代码没有任何作用
 _ = load_dotenv(find_dotenv())
 
 # 如果需要通过代理端口访问，还需要做如下配置
@@ -71,9 +69,11 @@ def get_completion(prompt, model = "ERNIE-Bot", temperature = 0.01):
     return resp["result"]
 
 
+# 如果是免费用户，在使用上述函数时，可以在入参中指定一个免费的模型（例如 Yi-34B-Chat）再运行
 get_completion(prompt = "你好，介绍以下你自己", model = "Yi-34B-Chat")
-get_completion(prompt = "你好，介绍以下你自己")
 
+# 如果你有文心系列模型 ERNIE-Bot 的使用额度，则可直接运行如下函数
+get_completion(prompt = "你好，介绍以下你自己")
 
 
 

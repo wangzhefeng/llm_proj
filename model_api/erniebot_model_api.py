@@ -22,8 +22,6 @@ from dotenv import load_dotenv, find_dotenv
 import erniebot
 
 # 读取本地/项目的环境变量
-# find_dotenv(): 寻找并定位 `.env` 文件的路基那个
-# load_dotenv(): 读取 `.env` 文件，并将其中的环境变量加载到当前的运行环境中，如果设置的是环境变量，代码没有任何作用
 _ = load_dotenv(find_dotenv())
 
 # 如果需要通过代理端口访问，还需要做如下配置
@@ -78,7 +76,7 @@ def get_completion(prompt, model = "ernie-3.5", temperature = 0.01):
 
 # 测试代码 main 函数
 def main():
-    pass
+    get_completion("你好，介绍一下你自己")
 
 if __name__ == "__main__":
     main()

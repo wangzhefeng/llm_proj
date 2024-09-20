@@ -17,6 +17,7 @@ import sys
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
+from dotenv import load_dotenv, find_dotenv
 
 import streamlit as st
 from langchain_openai import ChatOpenAI
@@ -27,7 +28,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.output_parsers import StrOutputParser
 
 from embedding_api.zhipuai_embedding import ZhipuAIEmbeddings
-from dotenv import load_dotenv, find_dotenv
 
 # 将父目录放入系统路径中
 sys.path.append("../knowledge_lib") 
