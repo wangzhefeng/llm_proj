@@ -167,3 +167,5 @@ cython_debug/
 .vscode/
 dataset/
 downloaded_models/
+checkpoints/
+pt_save_pretrained/

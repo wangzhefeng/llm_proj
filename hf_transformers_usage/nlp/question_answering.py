@@ -18,20 +18,23 @@ ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
+import torch
 from transformers import pipeline
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
-
-
-
+# device
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 
 
 # 测试代码 main 函数
 def main():
-    question_answerer = pipeline("question-answering")
+    question_answerer = pipeline(
+        "question-answering",
+        device = device,
+    )
     res = question_answerer({
         "question": "What is the name of the repository ?",
         "context": "Pipeline has been included in the huggingface/transformers repository",
