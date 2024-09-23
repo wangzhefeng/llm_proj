@@ -46,8 +46,6 @@ def openai_embedding(text: str, model: str = None):
     return response
 
 
-
-
 # 测试代码 main 函数
 def main():
     response = openai_embedding(text = "要生成 embedding 的输入文本，字符串形式。")

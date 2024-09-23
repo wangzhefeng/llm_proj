@@ -25,8 +25,12 @@ from dotenv import load_dotenv, find_dotenv
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
+# 读取本地/项目的环境变量
 os.environ["CURL_CA_BUNDLE"] = ""
 _ = load_dotenv(find_dotenv())
+# 如果需要通过代理端口访问，还需要做如下配置
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
 
 
 class BaseEmbeddings:
@@ -142,6 +146,7 @@ class DashscopeEmbedding(BaseEmbeddings):
         return response.output["embeddings"][0]["embedding"]
 
 
+# TODO
 class BgeEmbedding(BaseEmbeddings):
     """
     class for BGE Embeddings
