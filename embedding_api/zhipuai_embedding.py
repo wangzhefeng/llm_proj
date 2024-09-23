@@ -17,8 +17,7 @@ import sys
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-
-import logging
+from dotenv import load_dotenv, find_dotenv
 from typing import Dict, List, Any
 
 from langchain.embeddings.base import Embeddings
@@ -26,14 +25,21 @@ from langchain.pydantic_v1 import BaseModel, root_validator
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
-logger = logging.getLogger(__name__)
+# 读取本地/项目的环境变量
+_ = load_dotenv(find_dotenv())
+# 如果需要通过代理端口访问，还需要做如下配置
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
 
 
 class ZhipuAIEmbeddings(BaseModel, Embeddings):
-    """`Zhipuai Embeddings` embedding models."""
-
+    """
+    `Zhipuai Embeddings` embedding models.
+    """
     client: Any
-    """`zhipuai.ZhipuAI"""
+    """
+    `zhipuai.ZhipuAI
+    """
 
     @root_validator()
     def validate_environment(cls, values: Dict) -> Dict:
@@ -45,7 +51,8 @@ class ZhipuAIEmbeddings(BaseModel, Embeddings):
             values (Dict): 包含配置信息的字典，必须包含 client 的字段.
         Returns:
 
-            values (Dict): 包含配置信息的字典。如果环境中有zhipuai库，则将返回实例化的ZhipuAI类；否则将报错 'ModuleNotFoundError: No module named 'zhipuai''.
+            values (Dict): 包含配置信息的字典。如果环境中有zhipuai库，则将返回实例化的ZhipuAI类；
+                           否则将报错 'ModuleNotFoundError: No module named 'zhipuai''.
         """
         from zhipuai import ZhipuAI
         values["client"] = ZhipuAI()
@@ -62,8 +69,8 @@ class ZhipuAIEmbeddings(BaseModel, Embeddings):
             embeddings (List[float]): 输入文本的 embedding，一个浮点数值列表.
         """
         embeddings = self.client.embeddings.create(
-            model="embedding-2",
-            input=text
+            model = "embedding-2",
+            input = text
         )
         return embeddings.data[0].embedding
     
@@ -80,11 +87,15 @@ class ZhipuAIEmbeddings(BaseModel, Embeddings):
     
     
     async def aembed_documents(self, texts: List[str]) -> List[List[float]]:
-        """Asynchronous Embed search docs."""
+        """
+        Asynchronous Embed search docs.
+        """
         raise NotImplementedError("Please use `embed_documents`. Official does not support asynchronous requests")
 
     async def aembed_query(self, text: str) -> List[float]:
-        """Asynchronous Embed query text."""
+        """
+        Asynchronous Embed query text.
+        """
         raise NotImplementedError("Please use `aembed_query`. Official does not support asynchronous requests")
 
 
