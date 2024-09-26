@@ -21,11 +21,30 @@ ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
+from tinyAgent.Agent import Agent
+
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
+# TODO
+agent = Agent("./downloaded_models/internlm2-chat-20b")
+print(agent.system_prompt)
 
+# TODO
+response, _ = agent.text_completion(text = "你好", history = [])
+print(response)
 
+# TODO
+response, _ = agent.text_completion(text = "特朗普哪一年出生地？", history = _)
+print(response)
+
+# TODO
+response, _ = agent.text_completion(text = "周杰伦是谁？", history = _)
+print(response)
+
+# TODO
+response, _ = agent.text_completion(text = "书生浦语是什么？", history = _)
+print(response)
 
 
 
