@@ -185,6 +185,18 @@ class InternLM2Chat(BaseModel):
         self.load_model()
 
     def chat(self, prompt: str, history: List[Dict], content: str = "", meta_instruction: str = "") -> str:
+        """
+        模型对话
+
+        Args:
+            prompt (str): 用户提示词
+            history (List[Dict]): 消息历史
+            content (str, optional): _description_. Defaults to "".
+            meta_instruction (str, optional): 系统提示词. Defaults to "".
+
+        Returns:
+            str: _description_
+        """
         response, history = self.model.chat(
             self.tokenizer, 
             prompt,
@@ -203,11 +215,18 @@ class InternLM2Chat(BaseModel):
             self.path, 
             trust_remote_code = True
         )
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.path, 
-            torch_dtype = torch.float16, 
-            trust_remote_code = True
-        ).cuda().eval()
+        if torch.cuda.is_available():
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.path, 
+                torch_dtype = torch.float16, 
+                trust_remote_code = True
+            ).cuda().eval()
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.path, 
+                torch_dtype = torch.float16, 
+                trust_remote_code = True
+            ).eval()
         print('================ Model loaded ================')
 
 
