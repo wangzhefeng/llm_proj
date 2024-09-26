@@ -43,7 +43,7 @@ class VectorStore:
     
     def get_vector(self, EmbeddingModel: BaseEmbeddings) -> List[List[float]]:
         """
-        计算词向量
+        获得文档的词向量表示
 
         Args:
             EmbeddingModel (BaseEmbeddings): _description_
@@ -66,7 +66,7 @@ class VectorStore:
         """
         if not os.path.exists(path):
             os.makedirs(path)
-            
+        
         with open(f"{path}/docment.json", "w", encoding = "utf-8") as f:
             json.dump(self.document, f, ensure_ascii = False)
         
@@ -112,7 +112,7 @@ class VectorStore:
         Returns:
             List[str]: _description_
         """
-        # 将 query 计算词向量
+        # 将 query 转换为词向量
         query_vector = EmbeddingModel.get_embedding(query)
         # 在向量数据库中检索相似性较强的词向量
         result = np.array([

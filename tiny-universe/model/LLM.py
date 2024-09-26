@@ -37,6 +37,10 @@ from transformers import (
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
+# ------------------------------
+# RAG
+# ------------------------------
+# 
 PROMPT_TEMPLATE = {
     "RAG_PROMPT_TEMPLATE": """使用以上下文来回答用户的问题。如果你不知道答案，就说你不知道。总是使用中文回答。
         问题: {question}
@@ -202,6 +206,9 @@ class InternLM2Chat(BaseModel):
         )
 
 
+# ------------------------------
+# Agent
+# ------------------------------
 class BaseLLM:
     
     def __init__(self, path: str, model_name: str, adapter_path: str) -> None:
