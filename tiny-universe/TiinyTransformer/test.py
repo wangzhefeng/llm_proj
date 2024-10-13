@@ -28,7 +28,11 @@ from tiny_transformer import Transformer
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
+
+# ------------------------------
 # 创建模型配置文件
+# ------------------------------ 
+print("*" * 80)
 @dataclass
 class TransformerConfig:
     block_size: int = 1024
@@ -48,25 +52,39 @@ model_config = TransformerConfig(
     dropout = 0.0, 
     bias = True,
 )
+print(model_config)
 
-
+# ------------------------------
 # 创建模型
+# ------------------------------
+print("*" * 80)
 model = Transformer(model_config)
 
-
+# ------------------------------
 # 向前传递
+# ------------------------------
+print("*" * 80)
 idx = torch.randint(1, 10, (4, 8))
 logits, _ = model(idx)
+print("-" * 45)
 print(f"logits {logits.size()}")
 
-
+# ------------------------------
 # 模型推理
+# ------------------------------ 
+print("*" * 80)
 result = model.generate(idx, 3)
+print("-" * 45)
 print(f"generate result {result.size()}")
 
-
+# ------------------------------
 # 生成结果
+# ------------------------------ 
+print("*" * 80)
 print(result)
+print("*" * 80)
+
+
 
 
 # 测试代码 main 函数
