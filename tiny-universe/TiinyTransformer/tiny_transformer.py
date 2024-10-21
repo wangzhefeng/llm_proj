@@ -50,7 +50,7 @@ def attention(q, k, v, dropout_module = None, is_causal = False, mask = None):
     
     return y
 
- 
+
 class Embedding(nn.Module):
     """
     词向量模块

@@ -25,23 +25,27 @@ from openai import OpenAI
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
+# setup
 pd.set_option("display.max_columns", None, "display.max_rows", None)
-
 # open api key
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 openai.api_key = OPENAI_API_KEY
+
 
 # dataset
 df = pd.read_csv("dataset/Kaggle related questions on Qoura - Questions.csv")
 print(df.shape)
 print(df.head())
 
+
 # embedding
 client = OpenAI()
+
 
 def get_embedding(text, model = "text-embedding-3-small"):
     text = text.replace("\n", " ")
     return client.embeddings.create(input = [text], model = model).data[0].embedding
+
 
 def cosine_similarity():
     pass

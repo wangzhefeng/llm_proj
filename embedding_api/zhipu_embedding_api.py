@@ -17,6 +17,7 @@ import sys
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
+from typing import List
 from dotenv import load_dotenv, find_dotenv
 
 from zhipuai import ZhipuAI
@@ -30,7 +31,7 @@ os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
 os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
 
 
-def zhipu_embedding(text: str):
+def zhipu_embedding(text: List[str]):
     api_key = os.environ["ZHIPUAI_API_KEY"]
     client = ZhipuAI(api_key = api_key)
     response = client.embeddings.create(
@@ -45,7 +46,9 @@ def zhipu_embedding(text: str):
 
 # 测试代码 main 函数
 def main():
-    text = "要生成 embedding 的输入文本，字符串形式。"
+    text = [
+        "要生成 embedding 的输入文本，字符串形式。"
+    ]
     response = zhipu_embedding(text = text)
 
     print(f"response 类型为：{type(response)}")

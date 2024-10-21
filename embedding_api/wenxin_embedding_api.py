@@ -17,6 +17,7 @@ import sys
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
+from typing import List
 import json
 import requests
 from dotenv import load_dotenv, find_dotenv
@@ -30,7 +31,7 @@ os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
 os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
 
 
-def wenxin_embedding(text: str):
+def wenxin_embedding(text: List[str]):
     # 获取环境变量 wenxin_api_key, wenxin_secret_key
     api_key = os.environ["QIANFN_AK"]
     secret_key = os.environ["QIANFAN_SK"]
@@ -61,8 +62,9 @@ def wenxin_embedding(text: str):
 
 # 测试代码 main 函数
 def main():
-    # text 应为 List(str)
-    text = "要生成 embedding 的输入文本，字符串形式。"
+    text = [
+        "要生成 embedding 的输入文本，字符串形式。"
+    ]
     response = wenxin_embedding(text = text)
 
     print(f"本次 embedding id 为：{response["id"]}")

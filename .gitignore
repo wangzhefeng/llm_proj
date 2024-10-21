@@ -166,6 +166,10 @@ cython_debug/
 # ---------------------
 .vscode/
 dataset/
+database/
 downloaded_models/
 checkpoints/
 pt_save_pretrained/
+chroma_data/
+cache/
+finetuned-model/
