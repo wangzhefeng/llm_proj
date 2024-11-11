@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # ***************************************************
-# * File        : fastapi_deploy.py
+# * File        : model_download.py
 # * Author      : Zhefeng Wang
 # * Email       : wangzhefengr@163.com
-# * Date        : 2024-08-15
-# * Version     : 0.1.081520
+# * Date        : 2024-11-10
+# * Version     : 0.1.111018
 # * Description : description
 # * Link        : link
 # * Requirement : 相关模块版本需求(例如: numpy >= 2.1.0)
@@ -21,18 +21,18 @@ if str(ROOT) not in sys.path:
 from modelscope import (
     snapshot_download, 
     AutoModel, 
-    AutoTokenizer
+    AutoTokenizer,
+    GenerationConfig
 )
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
-# 模型下载
 model_dir = snapshot_download(
-    "LLM-Research/Meta-Llama-3.1-8B-Instruct", 
-    cache_dir = "downloaded_models",
-    revision = "master",
+    "qwen/Qwen-7B-Chat", 
+    cache_dir = "downloaded_models", 
+    revision = "v1.1.4"
 )
 
 

@@ -17,11 +17,11 @@ import sys
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-
 from typing import Any, List, Optional
+
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
 from langchain.llms.base import LLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 
 # global variable
@@ -36,7 +36,8 @@ class LLaMA3_1_LLM(LLM):
     model: AutoModelForCausalLM = None
 
     def __init__(self, model_name_or_path: str):
-        super().__init__()
+        super(LLaMA3_1_LLM, self).__init__()
+        
         print("正在从本地加载模型...")
         # tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -44,21 +45,23 @@ class LLaMA3_1_LLM(LLM):
             use_fast = False,
             # trust_remote_code = True,
         )
+        self.tokenizer.pad_token = self.tokenizer.eos_token
         # model
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name_or_path,
             torch_dtype = torch.bfloat16,
-            device_map="auto",
+            device_map = "auto",
             # trust_remote_code = True,
         )
-        self.tokenizer.pad_token = self.tokenizer.eos_token
         print("完成本地模型的加载")
 
     def _call(self, 
               prompt : str, 
               stop: Optional[List[str]] = None,
               run_manager: Optional[CallbackManagerForLLMRun] = None,
-              **kwargs: Any):
+              **kwargs: Any
+              ):
+        # prompt template
         messages = [
             {
                 "role": "system",
@@ -69,27 +72,25 @@ class LLaMA3_1_LLM(LLM):
                 "content": prompt,
             }
         ]
+        # input ids
         input_ids = self.tokenizer.apply_chat_template(
             messages, 
             tokenize = False, 
             add_generation_prompt = True
         )
-        model_inputs = self.tokenizer(
-            [input_ids], 
-            return_tensors = "pt"
-        ).to(self.model.device)
+        # TODO
+        model_inputs = self.tokenizer([input_ids], return_tensors = "pt").to(self.model.device)
+        # TODO
         generated_ids = self.model.generate(
             model_inputs.input_ids, 
-            max_new_tokens = 512
+            max_new_tokens = 512,
         )
         generated_ids = [
             output_ids[len(input_ids):] 
             for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
         ]
-        response = self.tokenizer.batch_decode(
-            generated_ids, 
-            skip_special_tokens = True
-        )[0]
+        
+        response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens = True)[0]
         
         return response
 
@@ -103,7 +104,9 @@ class LLaMA3_1_LLM(LLM):
 def main():
     # from LLM import LLaMA3_1_LLM
 
-    llm = LLaMA3_1_LLM(model_name_or_path = "D:\projects\llms_proj\llm_proj\downloaded_models\LLM-Research\Meta-Llama-3.1-8B-Instruct")
+    llm = LLaMA3_1_LLM(
+        model_name_or_path = "D:\projects\llms_proj\llm_proj\downloaded_models\LLM-Research\Meta-Llama-3.1-8B-Instruct"
+    )
     print(llm("你好"))
 
 if __name__ == "__main__":
