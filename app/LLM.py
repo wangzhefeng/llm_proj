@@ -35,31 +35,40 @@ from langchain.callbacks.manager import CallbackManagerForLLMRun
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
-class Qwen2_5_LLM(LLM):
+class LocalLLM(LLM):
     """
-    基于本地 Qwen2.5 自定义 LLM 类
+    基于本地下载模型自定义 LLM 类
     """
     tokenizer: AutoTokenizer = None
     model: AutoModelForCausalLM = None
 
-    def __init__(self, model_name_or_path: str) -> None:
-        super(Qwen2_5_LLM, self).__init__()
-
+    def __init__(self, model_name_or_path: str, pad_token: bool = False) -> None:
+        super(LocalLLM, self).__init__()
         print("正在从本地加载模型...")
-        # tokenizer
+        # 加载本地 tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_name_or_path, 
             use_fast = False,
+            trust_remote_code = True,
         )
-        # model
+        if pad_token:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+        # print(f"tokenizer:\n{self.tokenizer}")
+        
+        # 加载本地 LLM 模型
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name_or_path, 
             torch_dtype = torch.bfloat16, 
-            device_map = "auto"
+            device_map = "auto",
+            trust_remote_code = True,
         )
         self.model.generation_config = GenerationConfig.from_pretrained(
             model_name_or_path
         )
+        # 开启梯度检查点
+        self.model.enable_input_require_grads()
+        # print(f"model:\n{self.model}")
+        # print(f"model type:{self.model.dtype}")
         print("完成本地模型的加载")
     
     def _call(self,
@@ -67,48 +76,55 @@ class Qwen2_5_LLM(LLM):
               stop: Optional[List[str]] = None,
               run_manager: Optional[CallbackManagerForLLMRun] = None,
               **kwargs: Any):
+        """
+        模型推理
+        """
         # prompt template
         messages = [
-            {
-                "role": "user",
-                "content": prompt,
-            }
+            {"role": "user", "content": prompt}
         ]
-        
-        # TODO
+        # 模型输入
         input_ids = self.tokenizer.apply_chat_template(messages, tokenize = False, add_generation_prompt = True)
-        # print(f"input_ids:\n{input_ids}")
-        
-        # TODO
         model_inputs = self.tokenizer([input_ids], return_tensors = "pt").to(self.model.device)
-        # print(f"model_inputs:\n{model_inputs}")
-        # print(f"model_inputs.input_ids:\n{model_inputs.input_ids}")
-        
-        # 生成文本
-        generated_ids = self.model.generate(
-            model_inputs.input_ids, 
-            attention_mask = model_inputs.attention_mask, 
-            max_new_tokens = 512
-        )
-        # print(f"generated_ids:\n{generated_ids}")
-        # print(f"generated_ids length:\n{len(generated_ids)}")
-        generated_ids = [
-            output_ids[len(input_ids):]
-            for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-        ]
-        # print(f"generated_ids:\n{generated_ids}")
-        # print(f"generated_ids length:\n{len(generated_ids)}")
-        
-        # result
+        generated_ids = self.model.generate(model_inputs.input_ids, attention_mask = model_inputs.attention_mask, max_new_tokens = 512)
+        generated_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)]
+        # 模型输出
         response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens = True)
-        # print(f"response:\n{response}")
-        # print(f"response length: {len(response[0])}")
 
         return response[0]
     
     @property
     def _llm_type(self) -> str:
-        return "Qwen_2_5_LLM"
+        return "LLM"
+
+
+def get_tokenizer_model(model_path, pad_token: bool):
+    """
+    加载 tokenizer 和半精度模型
+    """
+    # 加载本地 tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_path, 
+        use_fast = False,
+        trust_remote_code = True
+    )
+    if pad_token:
+        tokenizer.pad_token = tokenizer.eos_token
+    print(f"tokenizer:\n{tokenizer}")
+
+    # 加载本地 LLM 模型
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path,  
+        torch_dtype = torch.bfloat16, 
+        device_map = "auto",
+        trust_remote_code = True,
+    )
+    # 开启梯度检查点
+    model.enable_input_require_grads()
+    print(f"model:\n{model}")
+    print(f"model type:{model.dtype}")
+    
+    return tokenizer, model
 
 
 
@@ -117,10 +133,10 @@ class Qwen2_5_LLM(LLM):
 def main():
     # from LLM import Qwen2_5_LLM
 
-    llm = Qwen2_5_LLM(
+    llm = LocalLLM(
         model_name_or_path = "D:\projects\llms_proj\llm_proj\downloaded_models\qwen\Qwen2.5-7B-Instruct"
     )
-    print(llm("你是谁"))
+    print(llm(prompt = "你是谁"))
 
 if __name__ == "__main__":
     main()

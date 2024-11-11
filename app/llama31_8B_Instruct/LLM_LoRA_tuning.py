@@ -35,7 +35,7 @@ from peft import LoraConfig, TaskType, get_peft_model, PeftModel
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
-def get_model(model_path):
+def get_tokenizer_model(model_path):
     """
     加载 tokenizer 和半精度模型
     """
@@ -75,8 +75,7 @@ def process_func(example, tokenizer):
     """
     # LlaMA 分词器会将一个中文字切分为多个 token，因此需要放开一些最大长度，保证数据的完整性
     MAX_LENGTH = 384
-
-    # TODO 指令集构建
+    # 指令集构建
     instruction = tokenizer(
         f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n现在你要扮演皇帝身边的女人--甄嬛<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{example['instruction'] + example['input']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
         add_special_tokens = False,  # 不在开头加 special_tokens
@@ -85,20 +84,18 @@ def process_func(example, tokenizer):
         f"{example["output"]}<|eot_id|>", 
         add_special_tokens = False
     )
-
     # input ids
     input_ids = instruction["input_ids"] + response["input_ids"] + [tokenizer.pad_token_id]
     # attention mask
     attention_mask = instruction["attention_mask"] + response["attention_mask"] + [1]  # 因为 eos token 也是要关注的，所以补充为 1
     # labels
     labels = [-100] * len(instruction["input_ids"]) + response["input_ids"] + [tokenizer.pad_token_id]
-
     # 截断
     if len(input_ids) > MAX_LENGTH:
         input_ids = input_ids[:MAX_LENGTH]
         attention_mask = attention_mask[:MAX_LENGTH]
         labels = labels[:MAX_LENGTH] 
-    
+    # output
     out = {
         "input_ids": input_ids,
         "attention_mask": attention_mask,

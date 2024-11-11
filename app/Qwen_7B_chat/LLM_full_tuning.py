@@ -50,7 +50,6 @@ def process_func(example, tokenizer):
     """
     # 分词器会将一个中文字切分为多个 token，因此需要放开一些最大长度，保证数据的完整性
     MAX_LENGTH = 128 
-
     # 指令集构建
     instruction = tokenizer(
         "\n".join(["<|im_start|>system", "现在你要扮演皇帝身边的女人--甄嬛.<|im_end|>" + "\n<|im_start|>user\n" + example["instruction"] + example["input"] + "<|im_end|>\n"]).strip(), 
@@ -60,12 +59,10 @@ def process_func(example, tokenizer):
         "<|im_start|>assistant\n" + example["output"] + "<|im_end|>\n", 
         add_special_tokens = False
     )
-
     # input_ids/attention_mask/labels
     input_ids = instruction["input_ids"] + response["input_ids"] + [tokenizer.pad_token_id]
     attention_mask = instruction["attention_mask"] + response["attention_mask"] + [1]  # 因为 eos token 也是要关注的所以补充为 1
     labels = [-100] * len(instruction["input_ids"]) + response["input_ids"] + [tokenizer.pad_token_id]  # Qwen 的特殊构造就是这样的
-
     # 截断
     if len(input_ids) > MAX_LENGTH:
         input_ids = input_ids[:MAX_LENGTH]

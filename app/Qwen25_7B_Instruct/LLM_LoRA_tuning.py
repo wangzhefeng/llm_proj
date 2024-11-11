@@ -34,7 +34,7 @@ from peft import LoraConfig, TaskType, get_peft_model, PeftModel
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
-def get_model(model_path):
+def get_tokenizer_model(model_path):
     """
     加载 tokenizer 和半精度模型
     """
@@ -45,7 +45,7 @@ def get_model(model_path):
         trust_remote_code = True
     )
     # tokenizer.pad_token = tokenizer.eos_token
-    print(tokenizer)
+    print(f"tokenizer:\n{tokenizer}")
 
     # 加载本地 LLM 模型
     model = AutoModelForCausalLM.from_pretrained(
@@ -54,9 +54,10 @@ def get_model(model_path):
         device_map = "auto",
         # trust_remote_code = True,
     )
-    print(model)
-    # model.enable_input_require_grads()  # 开启梯度检查点
-    print(model.dtype)
+    # 开启梯度检查点
+    model.enable_input_require_grads()  
+    print(f"model:\n{model}")
+    print(f"model type:{model.dtype}")
     
     return tokenizer, model
 
@@ -75,7 +76,6 @@ def process_func(example, tokenizer):
     """
     # 分词器会将一个中文字切分为多个 token，因此需要放开一些最大长度，保证数据的完整性
     MAX_LENGTH = 384
-
     # TODO 指令集构建
     instruction = tokenizer(
         f"<|im_start|>system\n现在你要扮演皇帝身边的女人--甄嬛<|im_end|>\n<|im_start|>user\n{example['instruction'] + example['input']}<|im_end|>\n<|im_start|>assistant\n", 
@@ -85,24 +85,20 @@ def process_func(example, tokenizer):
         f"{example['output']}", 
         add_special_tokens = False
     )
-
-    # input ids
+    # input_ids/attention_mask/labels
     input_ids = instruction["input_ids"] + response["input_ids"] + [tokenizer.pad_token_id]
-    # attention mask
     attention_mask = instruction["attention_mask"] + response["attention_mask"] + [1]  # 因为 eos token 也是要关注的, 所以补充为 1
-    # labels
     labels = [-100] * len(instruction["input_ids"]) + response["input_ids"] + [tokenizer.pad_token_id]
-    
     # 截断
     if len(input_ids) > MAX_LENGTH:
         input_ids = input_ids[:MAX_LENGTH]
         attention_mask = attention_mask[:MAX_LENGTH]
         labels = labels[:MAX_LENGTH]
-    
+    # output
     out = {
         "input_ids": input_ids,
         "attention_mask": attention_mask,
-        "labels": labels
+        "labels": labels,
     }
     
     return out
@@ -248,6 +244,11 @@ def main():
     model_path = "D:\projects\llms_proj\llm_proj\downloaded_models\qwen\Qwen2.5-7B-Instruct"
     # LoRA 输出对应 checkpoint 地址
     lora_path = 'D:\projects\llms_proj\llm_proj\\app\output\qwen2_5_7B_instruct_lora'
+    
+    # ------------------------------
+    # 加载 tokenizer 和半精度模型
+    # ------------------------------
+    tokenizer, model = get_tokenizer_model(model_path = model_path)
 
 if __name__ == "__main__":
     main()
