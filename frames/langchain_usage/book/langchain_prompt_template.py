@@ -18,8 +18,9 @@ ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from langchain.prompts import PromptTemplate
-from langchain.prompts.chat import ChatPromptTemplate
+# from langchain.prompts import PromptTemplate
+# from langchain.prompts.chat import ChatPromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
@@ -32,10 +33,10 @@ print(res1)
 
 
 # ChatPromptTemplate
-template = "你是一个能够将{input_language}翻译成{output_language}的助手。"
+system_template = "你是一个能够将{input_language}翻译成{output_language}的助手。"
 human_template = "{text}"
 chat_prompt = ChatPromptTemplate.from_messages([
-    ("system", template),
+    ("system", system_template),
     ("human", human_template),
 ])
 res2 = chat_prompt.format_messages(
@@ -43,6 +44,11 @@ res2 = chat_prompt.format_messages(
     output_language = "英文",
     text = "我爱编程"
 )
+res2 = chat_prompt.invoke({
+    "input_language": "中文",
+    "output_language": "英文",
+    "text": "我爱编程",
+})
 print(res2)
 
 
