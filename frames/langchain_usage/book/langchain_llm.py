@@ -23,24 +23,27 @@ LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 from langchain_openai import OpenAI
 from langchain_community.chat_models import ChatOpenAI
-from langchain.schema import HumanMessage
+from langchain_core.messages import HumanMessage
 
 # model
-llm = OpenAI()
-chat_model = ChatOpenAI()
+# llm = OpenAI()
+# chat_model = ChatOpenAI()
 
 
 # template
 text = "给生产杯子的公司取一个名字。"
-message = [HumanMessage(content = text)]
+message = [
+    HumanMessage(content = text)
+]
 
 
 
 
 # 测试代码 main 函数
 def main():
-    print(llm.invoke(text))
-    print(chat_model.invoke(message))
+    # print(llm.invoke(text))
+    # print(chat_model.invoke(message))
+    pass
 
 if __name__ == "__main__":
     main()
