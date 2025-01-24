@@ -173,3 +173,4 @@ pt_save_pretrained/
 chroma_data/
 cache/
 finetuned-model/
+logs/

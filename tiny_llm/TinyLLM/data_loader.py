@@ -53,7 +53,13 @@ class LLMDataset(Dataset):
         return self.input_ids[index], self.target_ids[index]
 
 
-def create_dataloader(text, batch_size=4, max_length=256, stride=128, shuffle=True, drop_last=True, num_workers=0):
+def create_dataloader(text, 
+                      batch_size=4, 
+                      max_length=256, 
+                      stride=128, 
+                      shuffle=True, 
+                      drop_last=True, 
+                      num_workers=0):
     # initialize the tokenizer
     import tiktoken
     tokenizer = tiktoken.get_encoding("gpt2")
@@ -76,15 +82,13 @@ def create_dataloader(text, batch_size=4, max_length=256, stride=128, shuffle=Tr
 # 测试代码 main 函数
 def main():
     import tiktoken
-    from tiny_llm.data_load import data_download, data_load
-    
-    # 数据下载
+    from tiny_llm.TinyLLM.data_load import data_download, data_load
+
+    # ------------------------------
+    # data download & load
+    # ------------------------------
     file_path = data_download()
-    logger.info(f"file_path: {file_path}")
-    
-    # 数据记载
     raw_text = data_load(file_path=file_path)
-    
     # ------------------------------
     # tokenization test
     # ------------------------------
@@ -92,6 +96,7 @@ def main():
     enc_text = tokenizer.encode(raw_text)
     logger.info(f"len(enc_text): {len(enc_text)}")
     
+    # data sampling
     enc_sample = enc_text[50:]
     context_size = 4
     x = enc_sample[:context_size]
@@ -110,7 +115,6 @@ def main():
         context = enc_sample[:i]
         desired = enc_sample[i]
         logger.info(f"{tokenizer.decode(context)} ----> {tokenizer.decode([desired])}")
-
     # ------------------------------
     # dataset and dataloader test
     # ------------------------------
@@ -126,6 +130,7 @@ def main():
         x, y = batch
         logger.info(f"x: {x}")
         logger.info(f"y: {y}")
+        break
 
 if __name__ == "__main__":
     main()

@@ -28,7 +28,7 @@ from utils.log_util import logger
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
-def data_download(data_dir: str = "dataset/tiny_llm"):
+def data_download(data_dir: str = r"dataset\tiny_llm"):
     """
     data download
 
