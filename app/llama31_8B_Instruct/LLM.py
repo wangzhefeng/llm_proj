@@ -17,6 +17,8 @@ import sys
 ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
+import warnings
+warnings.filterwarnings("ignore")
 from typing import Any, List, Optional
 
 import torch
@@ -105,7 +107,7 @@ def main():
     # from LLM import LLaMA3_1_LLM
 
     llm = LLaMA3_1_LLM(
-        model_name_or_path = "D:\projects\llms_proj\llm_proj\downloaded_models\LLM-Research\Meta-Llama-3.1-8B-Instruct"
+        model_name_or_path = "D:/projects/llms_proj/llm_proj/downloaded_models/LLM-Research/Meta-Llama-3.1-8B-Instruct"
     )
     print(llm("你好"))
 
