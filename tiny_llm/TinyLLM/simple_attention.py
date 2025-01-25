@@ -27,6 +27,9 @@ from utils.log_util import logger
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
+# input text
+input_strings = "Your journey starts with one step."
+
 # tokens embeddings
 inputs = torch.tensor(
     [[0.43, 0.15, 0.89], # Your     (x^1)
@@ -141,9 +144,9 @@ logger.info(f"context_vec_2: \n{context_vec_2}")
 
 
 # ------------------------------
-# self-attention class
+# self-attention class v1
 # ------------------------------
-class SelfAttention(nn.Module):
+class SelfAttention_V1(nn.Module):
     
     def __init__(self, d_in, d_out):
         super().__init__()
@@ -170,9 +173,98 @@ d_in = inputs.shape[1]
 # the output embedding size, d=2
 d_out = 2
 
-sa_v1 = SelfAttention(d_in, d_out)
+sa_v1 = SelfAttention_V1(d_in, d_out)
 sa_v1_output = sa_v1(inputs)
 logger.info(f"sa_v1_output: \n{sa_v1_output}")
+
+
+# ------------------------------
+# self-attention class v2
+# ------------------------------
+class SelfAttention_V2(nn.Module):
+    
+    def __init__(self, d_in, d_out, qkv_bias=False):
+        super().__init__()
+
+        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
+    
+    def forward(self, x):
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+    
+        attn_scores = queries @ keys.T
+        attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
+        context_vec = attn_weights @ values
+        
+        return context_vec
+
+
+torch.manual_seed(789)
+# the input embedding size, d=3
+d_in = inputs.shape[1]
+# the output embedding size, d=2
+d_out = 2
+
+sa_v2 = SelfAttention_V2(d_in, d_out)
+sa_v2_output = sa_v2(inputs)
+logger.info(f"sa_v2_output: \n{sa_v2_output}")
+
+# ------------------------------
+# causal attention mask
+# ------------------------------
+# simple method
+# --------------
+# attention weights
+queries = sa_v2.W_query(inputs)
+keys = sa_v2.W_key(inputs)
+attn_scores = queries @ keys.T
+attn_weights = torch.softmax(attn_scores / keys.shape[-1] ** 0.5, dim=-1)
+logger.info(f"attn_weights: \n{attn_weights}")
+
+# masked attention weights
+context_length = attn_scores.shape[0]
+mask_simple = torch.tril(torch.ones(context_length, context_length), diagonal=0)
+logger.info(f"mask_simple: \n{mask_simple}")
+masked_simple = attn_weights * mask_simple
+logger.info(f"masked_simple: \n{masked_simple}")
+
+# normalization
+row_sums = masked_simple.sum(dim=-1, keepdim=True)
+mask_simple_norm = masked_simple / row_sums
+logger.info(f"mask_simple_norm: \n{mask_simple_norm}")
+
+
+# efficient approach
+# --------------
+# attention weights
+queries = sa_v2.W_query(inputs)
+keys = sa_v2.W_key(inputs)
+attn_scores = queries @ keys.T
+
+# masked attention scores
+context_length = attn_scores.shape[0]
+# mask = torch.tril(torch.ones(context_length, context_length))
+# logger.info(f"mask: \n{mask.bool()}")
+mask = torch.triu(torch.ones(context_length, context_length), diagonal=1)
+# logger.info(f"mask: \n{mask.bool()}")
+masked = attn_scores.masked_fill(mask.bool(), -torch.inf)
+logger.info(f"masked: \n{masked}")
+attn_weights = torch.softmax(masked / keys.shape[-1] ** 0.5, dim=-1)
+logger.info(f"attn_weights: \n{attn_weights}")
+
+# ------------------------------
+# attention mask with dropout
+# ------------------------------
+torch.manual_seed(123)
+dropout = torch.nn.Dropout(0.5)
+example = torch.ones(6, 6)
+logger.info(f"dropout(example): {dropout(example)}")
+torch.manual_seed(123)
+logger.info(f"dropout(attn_weights): {dropout(attn_weights)}")
+
 
 
 
