@@ -21,10 +21,11 @@ ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-import torch 
+import torch
 import torch.nn as nn
 
-from tiny_llm.TinyLLM.activation import GELU
+from tiny_llm.TinyLLM.utils.activation import GELU
+from tiny_llm.TinyLLM.attention import MultiHeadAttention
 from utils.log_util import logger
 
 # set options
@@ -58,7 +59,7 @@ class GPTModel(nn.Module):
         # embedding
         tok_embeds = self.tok_emb(in_idx)
         pos_embeds = self.pos_emb(torch.arange(seq_len, device=in_idx.device))
-        x = tok_embeds + pos_embeds
+        x = tok_embeds + pos_embeds  # shape: [batch_size, num_tokens, emb_size]
         x = self.drop_emb(x)  # dropout
         # transformer blocks
         x = self.trf_blocks(x)
@@ -74,8 +75,34 @@ class TransformerBlock(nn.Module):
     
     def __init__(self, cfg):
         super().__init__()
-
+        
+        self.attn = MultiHeadAttention(
+            d_in = cfg["emb_dim"],
+            d_out = cfg["emb_dim"],
+            context_length = cfg["context_length"],
+            num_heads = cfg["n_heads"],
+            dropout = cfg["drop_rate"],
+            qkv_bias = cfg["qkv_bias"],
+        )
+        self.ff = FeedForward(cfg)
+        self.norm1 = LayerNorm(cfg["emb_dim"])
+        self.norm2 = LayerNorm(cfg["emb_dim"])
+        self.drop_shortcut = nn.Dropout(cfg["drop_rate"])
+    
     def forward(self, x):
+        # shortcut connection for attention block
+        shortcut = x
+        x = self.norm1(x)
+        x = self.attn(x)
+        x = self.drop_shortcut(x)
+        x = shortcut + x
+        # shortcut connection for feed forward block
+        shortcut = x
+        x = self.norm2(x)
+        x = self.ff(x)
+        x = self.drop_shortcut(x)
+        x = shortcut + x
+        
         return x
 
 
@@ -110,6 +137,27 @@ class FeedForward(nn.Module):
         return self.layers(x)
 
 
+def generate_text_simple(model, idx, max_new_tokens: int, context_size: int):
+    # idx is (batch, n_tokens) array of indices in the current contex
+    for _ in range(max_new_tokens):
+        # crop current context if it exceeds the supported context size
+        idx_cond = idx[:, -context_size:]
+        # get the predictions
+        with torch.no_grad():
+            logits = model(idx_cond)
+        # focus only on the last time step
+        # (batch, n_tokens, vocab_size) -> (batch, vocab_size)
+        logits = logits[:, -1, :]
+        # softmax
+        probas = torch.softmax(logits, dim=-1)  # (batch, vocab_size)
+        # get the idx of the vocab entry with the highest probability value
+        idx_next = torch.argmax(probas, dim = -1, keepdim = True)
+        # append sampled index to the running sequence
+        idx = torch.cat((idx, idx_next), dim = 1)  # (batch, n_tokens+1)
+
+    return idx
+
+
 
 
 # 测试代码 main 函数
@@ -138,7 +186,6 @@ def main():
     logger.info(f"batch: \n{batch}")
     logger.info(f"batch.shape: {batch.shape}")
 
-    
     # ------------------------------
     # Layer Norm test
     # ------------------------------
@@ -161,16 +208,67 @@ def main():
     ffn = FeedForward(GPT_CONFIG_124M)
     x = torch.rand(2, 3, 768)
     out = ffn(x)
-    print(out.shape)
+    logger.info(out.shape)
 
     # ------------------------------
-    # 
+    # Transformer Block test
+    # ------------------------------
+    # shape: [batch_size, num_tokens, emb_dim]
+    torch.manual_seed(123)
+    x = torch.rand(2, 4, 768)
+    block = TransformerBlock(GPT_CONFIG_124M)
+    output = block(x)
+    logger.info(f"Input shape: {x.shape}")
+    logger.info(f"Output shape: {output.shape}")
+
     # ------------------------------
     # GPT model
+    # ------------------------------
+    torch.manual_seed(123)
+    # model
     model = GPTModel(GPT_CONFIG_124M)
+    # model forward
     logits = model(batch)
+    logger.info(f"Input: \n{batch}")
     logger.info(f"Output: \n{logits}")
     logger.info(f"Output shape: {logits.shape}")
+    # model params
+    total_params = sum(p.numel() for p in model.parameters())
+    logger.info(f"Total number of parameters: {total_params:,}")
+    # logger.info(f"Token embedding layer shape: {model.tok_emb.weight.shape}")
+    # logger.info(f"Output layer shape: {model.out_head.weight.shape}")
+    total_params_gpt2 = total_params - sum(p.numel() for p in model.out_head.parameters())
+    logger.info(f"Number of trainable parameters considering weight tying: {total_params_gpt2:,}")
+    # compute memory demand of the model
+    total_size_bytes = total_params * 4  # total size in bytes(assuming float32, 4 bytes per parameter)
+    # convert to megabytes
+    total_size_mb = total_size_bytes / (1024 * 1024)
+    logger.info(f"Total size of the model: {total_size_mb:.2f} MB")
+
+    # ------------------------------
+    # generating text
+    # ------------------------------
+    start_context = "Hello, I am"
+    encoded = tokenizer.encode(start_context)
+    logger.info(f"encoded: {encoded}")
+    
+    encoded_tensor = torch.tensor(encoded).unsqueeze(0)
+    logger.info(f"encoded_tensor.shape: {encoded_tensor.shape}")
+
+    # disable dropout
+    model.eval()
+
+    out = generate_text_simple(
+        model = model,
+        idx = encoded_tensor,
+        max_new_tokens = 6,
+        context_size=GPT_CONFIG_124M["context_length"],
+    )
+    logger.info(f"Output: {out}")
+    logger.info(f"Output length: {len(out[0])}") 
+    
+    decoded_text = tokenizer.decode(out.squeeze(0).tolist())
+    logger.info(decoded_text)
 
 if __name__ == "__main__":
     main()
