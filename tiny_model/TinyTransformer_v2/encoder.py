@@ -27,7 +27,7 @@ import torch.nn as nn
 from layer_norm import Norm
 from multi_head_attention import MultiHeadAttention
 from feed_forward import FeedForward
-from tiny_llm.tiny_transformer.embedding import Embedder
+from tiny_model.tiny_transformer.embedding import Embedder
 from positional_encoder import PositionalEncoder
 
 # global variable

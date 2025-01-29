@@ -25,7 +25,7 @@ import tiktoken
 import torch
 import matplotlib.pyplot as plt
 
-# from tiny_llm.TinyLLM.training import (
+# from tiny_model.TinyLLM.training import (
 #     text_to_token_ids, 
 #     token_ids_to_text,
 #     generate_text_simple,

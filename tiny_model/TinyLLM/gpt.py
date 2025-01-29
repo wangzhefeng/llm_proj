@@ -24,8 +24,8 @@ if str(ROOT) not in sys.path:
 import torch
 import torch.nn as nn
 
-from tiny_llm.TinyLLM.utils.activation import GELU
-from tiny_llm.TinyLLM.attention import MultiHeadAttention
+from tiny_model.TinyLLM.utils.activation import GELU
+from tiny_model.TinyLLM.attention import MultiHeadAttention
 from utils.log_util import logger
 
 # set options
@@ -191,7 +191,7 @@ def generate(model, idx, max_new_tokens, context_size,
             idx_next = torch.multinomial(probs, num_samples=1)  # (batch_size, 1)
         # otherwise same as before: get idx of the vocab entry with the highest logits value
         else:
-            idx_next = torch.argmax(logits, dim=01, keepdim=True)  # (batch_size, 1)
+            idx_next = torch.argmax(logits, dim=-1, keepdim=True)  # (batch_size, 1)
         # stop generating early if end-of-sequence token is encountered and eos_id is specified
         if idx_next == eos_id:
             break

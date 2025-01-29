@@ -82,7 +82,7 @@ def create_dataloader(text,
 # 测试代码 main 函数
 def main():
     import tiktoken
-    from tiny_llm.TinyLLM.data_load import data_download, data_load
+    from tiny_model.TinyLLM.data_load import data_download, data_load
 
     # ------------------------------
     # data download & load

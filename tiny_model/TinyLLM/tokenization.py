@@ -103,12 +103,12 @@ def main():
     input_text_3 = "Hello, do you like tea. Is this-- a test?"
 
     # 训练数据下载、加载
-    from tiny_llm.TinyLLM.data_load import data_download, data_load
+    from tiny_model.TinyLLM.data_load import data_download, data_load
     file_path = data_download()
     raw_text = data_load(file_path=file_path)
 
     # 构建数据词典
-    from tiny_llm.TinyLLM.tokenization import build_vocab, SimpleTokenizer
+    from tiny_model.TinyLLM.tokenization import build_vocab, SimpleTokenizer
     vocab = build_vocab(text=raw_text)
     logger.info(f"vocab: {vocab}")
 

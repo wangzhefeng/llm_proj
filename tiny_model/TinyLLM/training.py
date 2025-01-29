@@ -31,9 +31,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from tiny_llm.TinyLLM.data_load import data_load
-from tiny_llm.TinyLLM.data_loader import create_dataloader
-from tiny_llm.TinyLLM.gpt import GPTModel, generate_text_simple
+from tiny_model.TinyLLM.data_load import data_load
+from tiny_model.TinyLLM.data_loader import create_dataloader
+from tiny_model.TinyLLM.gpt import GPTModel, generate_text_simple
 from utils.log_util import logger
 
 warnings.filterwarnings("ignore")
@@ -362,13 +362,13 @@ def main():
     logger.info(f"perplexity: {perplexity}")
     
     # 数据加载
-    from tiny_llm.TinyLLM.data_load import data_load
+    from tiny_model.TinyLLM.data_load import data_load
     raw_text = data_load()
     logger.info(f"raw_text[:99]: {raw_text[:99]}")
     logger.info(f"raw_text[:99]: {raw_text[-99:]}")
 
     # training and validation data loader create
-    from tiny_llm.TinyLLM.data_loader import create_dataloader
+    from tiny_model.TinyLLM.data_loader import create_dataloader
     train_ratio = 0.90
     split_idx = int(train_ratio * len(raw_text))
     train_data = raw_text[:split_idx]

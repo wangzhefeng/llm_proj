@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
 
 import torch
 
-from tiny_llm.TinyLLM.gpt import GPTModel
+from tiny_model.TinyLLM.gpt import GPTModel
 from utils.log_util import logger
 
 # global variable
