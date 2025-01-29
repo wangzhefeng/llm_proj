@@ -22,7 +22,9 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 import time
 import warnings
-from importlib.metadata import version
+# from importlib.metadata import version
+# logger.info(f"torch version: {version('torch')}")
+# logger.info(f"tiktoken version: {version('tiktoken')}")
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -40,9 +42,7 @@ warnings.filterwarnings("ignore")
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
-logger.info(f"torch version: {version('torch')}")
-logger.info(f"tiktoken version: {version('tiktoken')}")
-
+# device
 if torch.cuda.is_available():
     device = torch.device("cuda")
 elif torch.backends.mps.is_available():
