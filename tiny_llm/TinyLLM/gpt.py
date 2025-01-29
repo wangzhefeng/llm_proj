@@ -29,7 +29,7 @@ from tiny_llm.TinyLLM.attention import MultiHeadAttention
 from utils.log_util import logger
 
 # set options
-torch.set_printoptions(sci_mode=False)
+# torch.set_printoptions(sci_mode=False)
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
@@ -137,7 +137,7 @@ class FeedForward(nn.Module):
         return self.layers(x)
 
 
-def generate_text_simple(model, idx, max_new_tokens: int, context_size: int):
+def generate_text_simple(model, idx: torch.tensor, max_new_tokens: int, context_size: int):
     # idx is (batch, n_tokens) array of indices in the current contex
     for _ in range(max_new_tokens):
         # crop current context if it exceeds the supported context size
@@ -148,14 +148,59 @@ def generate_text_simple(model, idx, max_new_tokens: int, context_size: int):
         # focus only on the last time step
         # (batch, n_tokens, vocab_size) -> (batch, vocab_size)
         logits = logits[:, -1, :]
+        logger.info(f"logits: {logits}")
         # softmax
         probas = torch.softmax(logits, dim=-1)  # (batch, vocab_size)
+        logger.info(f"probas: {probas}")
         # get the idx of the vocab entry with the highest probability value
         idx_next = torch.argmax(probas, dim = -1, keepdim = True)
+        logger.info(f"idx_next: {idx_next}")
         # append sampled index to the running sequence
         idx = torch.cat((idx, idx_next), dim = 1)  # (batch, n_tokens+1)
+        logger.info(f"idx: {idx}\n")
 
     return idx
+
+
+def generate(model, idx, max_new_tokens, context_size, 
+             temperature=0.0, top_k=None, eos_id=None):
+    # for-loop is the same as before: get logits, and only focus on last time step
+    for _ in range(max_new_tokens):
+        # crop current context if it exceeds the supported context size
+        idx_cond = idx[:, -context_size:]
+        # get the predictions
+        with torch.no_grad():
+            logits = model(idx_cond)
+        # focus only on the last time step
+        logits = logits[:, -1, :]  # (batch, n_tokens, vocab_size) -> (batch, vocab_size)
+        # filter logits with top_k sampling
+        if top_k is not None:
+            top_logits, _ = torch.topk(logits, top_k)
+            min_val = top_logits[:, -1]
+            logits = torch.where(
+                logits < min_val, 
+                torch.tensor(float("-inf")).to(logits.device),
+                logits
+            )
+        # apply temperature scaling
+        if temperature > 0.0:
+            logits = logits / temperature
+            # apply softmax to get probabilities
+            probs = torch.softmax(logits, dim=-1)  # (batch_size, context_len)
+            # sample from the distribution
+            idx_next = torch.multinomial(probs, num_samples=1)  # (batch_size, 1)
+        # otherwise same as before: get idx of the vocab entry with the highest logits value
+        else:
+            idx_next = torch.argmax(logits, dim=01, keepdim=True)  # (batch_size, 1)
+        # stop generating early if end-of-sequence token is encountered and eos_id is specified
+        if idx_next == eos_id:
+            break
+        # append sampled index to the running sequence
+        idx = torch.cat([idx, idx_next], dim=1)  # (batch_size, num_tokens+1)
+
+    return idx
+
+
 
 
 
@@ -246,7 +291,7 @@ def main():
     logger.info(f"Total size of the model: {total_size_mb:.2f} MB")
 
     # ------------------------------
-    # generating text
+    # generating text: v1
     # ------------------------------
     start_context = "Hello, I am"
     encoded = tokenizer.encode(start_context)
@@ -269,6 +314,19 @@ def main():
     
     decoded_text = tokenizer.decode(out.squeeze(0).tolist())
     logger.info(decoded_text)
+    
+    # ------------------------------
+    # generating text: v2
+    # ------------------------------
+    # token_ids = generate(
+    #     model = model,
+    #     idx = text_to_token_ids("Every effort moves you", tokenizer),
+    #     max_new_toknes = 15,
+    #     context_size = GPT_CONFIG_124M["context_length"],
+    #     top_k = 25,
+    #     temperature = 1.4,
+    # )
+    # logger.info(f"Output text: \n{token_ids_to_text(token_ids, tokenizer)}")
 
 if __name__ == "__main__":
     main()

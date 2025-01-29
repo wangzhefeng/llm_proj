@@ -28,15 +28,11 @@ from utils.log_util import logger
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
-def data_download(data_dir: str = r"dataset\tiny_llm"):
+def data_download(data_dir: str = "dataset/tiny_llm"):
     """
     data download
-
-    Args:
-        data_dir (str, optional): _description_. Defaults to "dataset/tiny_llm".
     """
     logger.info(f"Download data...")
-    # logger.info("-" * 15)
     # 数据路径
     data_path = os.path.join(ROOT, data_dir)
     if not os.path.exists(data_path):
@@ -50,25 +46,33 @@ def data_download(data_dir: str = r"dataset\tiny_llm"):
             "LLMs-from-scratch/main/ch02/01_main-chapter-code/"
             "the-verdict.txt"
         )
-        urllib.request.urlretrieve(url, file_path)
-    
-    logger.info(f"Data 'the-verdict.txt' has downloaded into '{data_path}'")
+        urllib.request.urlretrieve(url, file_path)    
+        logger.info(f"Data 'the-verdict.txt' has downloaded into '{data_path}'")
     
     return file_path
 
 
-def data_load(file_path: str):
+def data_load(url = None):
     """
     data load
 
     Args:
         file_path (str): _description_
     """
+    # 数据下载
+    file_path = data_download()
+    # logger.info(f"file_path: {file_path}")
+    # 数据加载
     logger.info(f"Load data...")
-    # logger.info("-" * 15)
-    with open(file_path, "r", encoding="utf-8") as f:
-        raw_text = f.read()
-    logger.info(f"Total number of character: {len(raw_text)}")
+    if not os.path.exists(file_path):
+        with urllib.request.urlopen(url) as response:
+            text_data = response.read().decode("utf-8")
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(text_data)
+    else:
+        with open(file_path, "r", encoding="utf-8") as f:
+            raw_text = f.read()
+            # logger.info(f"Total number of character: {len(raw_text)}")
 
     return raw_text
 
@@ -77,13 +81,10 @@ def data_load(file_path: str):
 
 # 测试代码 main 函数
 def main():
-    # 数据下载
-    file_path = data_download()
-    logger.info(f"file_path: {file_path}")
-    
-    # 数据记载
-    raw_text = data_load(file_path=file_path)
+    # 数据加载
+    raw_text = data_load()
     logger.info(f"raw_text[:99]: {raw_text[:99]}")
+    logger.info(f"raw_text[:99]: {raw_text[-99:]}")
 
 if __name__ == "__main__":
     main()

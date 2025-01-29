@@ -87,8 +87,7 @@ def main():
     # ------------------------------
     # data download & load
     # ------------------------------
-    file_path = data_download()
-    raw_text = data_load(file_path=file_path)
+    raw_text = data_load()
     # ------------------------------
     # tokenization test
     # ------------------------------
