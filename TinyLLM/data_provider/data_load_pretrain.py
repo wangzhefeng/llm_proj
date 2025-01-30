@@ -21,10 +21,6 @@ ROOT = os.getcwd()
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 import urllib.request
-import zipfile
-from pathlib import Path
-
-import pandas as pd
 
 from utils.log_util import logger
 
@@ -32,7 +28,7 @@ from utils.log_util import logger
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
-def data_download(data_dir: str = "dataset/tiny_llm"):
+def data_download_url(url: str, data_dir: str = "dataset/tiny_llm"):
     """
     data download
     """
@@ -41,14 +37,11 @@ def data_download(data_dir: str = "dataset/tiny_llm"):
     data_path = os.path.join(ROOT, data_dir)
     if not os.path.exists(data_path):
         os.makedirs(data_path)
+    
     # 数据文件路径
-    file_path = os.path.join(data_path, "the-verdict.txt")
+    file_name = url.split("/")[-1]
+    file_path = os.path.join(data_path, file_name)
     if not os.path.exists(file_path):
-        url = (
-            "https://raw.githubusercontent.com/rasbt/"
-            "LLMs-from-scratch/main/ch02/01_main-chapter-code/"
-            "the-verdict.txt"
-        )
         urllib.request.urlretrieve(url, file_path)    
         logger.info(f"Data 'the-verdict.txt' has downloaded into '{data_path}'")
     
@@ -80,37 +73,6 @@ def data_load(url = None):
     return raw_text
 
 
-def download_and_unzip_spam_data():
-    # params
-    url = "https://archive.ics.uci.edu/static/public/228/sms+spam+collection.zip"
-    zip_path = os.path.join(ROOT, "dataset/sms_spam_collection.zip")
-    extracted_path = os.path.join(ROOT, "dataset/sms_spam_collection")
-    data_file_path = Path(extracted_path) / "SMSSpamCollection.tsv"
-    logger.info(f"data_file_path: {data_file_path}")
-    # data file path check
-    if data_file_path.exists():
-        logger.info(f"{data_file_path} already exists. Skipping download and extraction.")
-        return
-    # data file download
-    with urllib.request.urlopen(url) as response:
-        with open(zip_path, "wb") as out_file:
-            out_file.write(response.read())
-    # unzipping the file
-    with zipfile.ZipFile(zip_path, "r") as zip_ref:
-        zip_ref.extractall(extracted_path)
-    # add .tsv file extension
-    original_file_path = Path(extracted_path) / "SMSSpamCollection"
-    os.rename(original_file_path, data_file_path)
-    logger.info(f"File downloaded and saved as {data_file_path}")
-
-
-def load_spam_data():
-    extracted_path = os.path.join(ROOT, "dataset/sms_spam_collection")
-    data_file_path = Path(extracted_path) / "SMSSpamCollection.tsv"
-    # data read
-    df = pd.read_csv(data_file_path, sep="\t", header=None, names=["Label", "Text"])
-
-    return df
 
 
 
@@ -118,18 +80,11 @@ def load_spam_data():
 # 测试代码 main 函数
 def main():
     # ------------------------------
-    # 数据加载
+    # llm pretrain data
     # ------------------------------
-    raw_text = data_load()
+    raw_text = data_load(url = "https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/ch02/01_main-chapter-code/the-verdict.txt",)
     logger.info(f"raw_text[:99]: {raw_text[:99]}")
     logger.info(f"raw_text[:99]: {raw_text[-99:]}")
-
-    # ------------------------------
-    # finetuning for text classification
-    # ------------------------------
-    download_and_unzip_spam_data()
-    df = load_spam_data()
-    logger.info(f"df: \n{df.head()}")
 
 if __name__ == "__main__":
     main()

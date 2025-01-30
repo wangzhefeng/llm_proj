@@ -23,7 +23,7 @@ if str(ROOT) not in sys.path:
 
 import pandas as pd
 
-from tiny_model.TinyLLM.data_load import load_spam_data
+from tiny_model.TinyLLM.data_load_pretrain import load_spam_data
 from utils.log_util import logger
 
 # global variable

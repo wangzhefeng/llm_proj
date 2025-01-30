@@ -33,7 +33,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from tiny_model.TinyLLM.data_load import data_load
+from tiny_model.TinyLLM.data_load_pretrain import data_load
 from tiny_model.TinyLLM.data_loader import create_dataloader
 from tiny_model.TinyLLM.gpt import GPTModel, generate_text_simple
 from utils.log_util import logger

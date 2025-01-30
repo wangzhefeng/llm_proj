@@ -103,7 +103,7 @@ def main():
     input_text_3 = "Hello, do you like tea. Is this-- a test?"
 
     # 训练数据下载、加载
-    from tiny_model.TinyLLM.data_load import data_download, data_load
+    from tiny_model.TinyLLM.data_load_pretrain import data_download, data_load
     file_path = data_download()
     raw_text = data_load(file_path=file_path)
 

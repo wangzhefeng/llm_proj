@@ -50,7 +50,7 @@ def main():
     # ------------------------------
     # encoding word positions
     # ------------------------------
-    from tiny_model.TinyLLM.data_load import data_download, data_load
+    from tiny_model.TinyLLM.data_load_pretrain import data_download, data_load
     from tiny_model.TinyLLM.data_loader import create_dataloader
 
     # params
