@@ -37,11 +37,12 @@ from tokenizer import Tokenizer
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
+# data path
 DATA_CACHE_DIR = Path("data")
 DATA_CACHE_DIR.mkdir(exist_ok=True)
 
 
-def download_file(url: str, filename: str, chunk_size: int = 1024) -> None:
+def _download_file(url: str, filename: str, chunk_size: int = 1024) -> None:
     response = requests.get(url, stream=True)
     total = int(response.headers.get("content-length", 0))
 
@@ -58,13 +59,16 @@ def download_file(url: str, filename: str, chunk_size: int = 1024) -> None:
 
 
 def download() -> None:
+    """
+    download and extract data
+    """
+    # download data
     data_url = "https://huggingface.co/datasets/roneneldan/TinyStories/resolve/main/TinyStories_all_data.tar.gz"
     data_filename = DATA_CACHE_DIR / "TinyStories_all_data.tar.gz"
-
     if not data_filename.exists():
         print("Downloading TinyStories dataset...")
-        download_file(data_url, str(data_filename))
-
+        _download_file(data_url, str(data_filename))
+    # extract data
     data_dir = DATA_CACHE_DIR / "TinyStories_all_data"
     if not data_dir.exists():
         data_dir.mkdir(exist_ok=True)
@@ -75,17 +79,16 @@ def download() -> None:
 def train_vocab(vocab_size: int) -> None:
     prefix = DATA_CACHE_DIR / f"tok{vocab_size}"
     tiny_file = DATA_CACHE_DIR / "tiny.txt"
-
     data_dir = DATA_CACHE_DIR / "TinyStories_all_data"
     shard_filenames = sorted(glob.glob(str(data_dir / "*.json")))
-
+    # training input prepare
     with open(tiny_file, "w") as f:
         for shard in shard_filenames[:10]:
             with open(shard, "r") as g:
                 data = json.load(g)
             for example in data:
                 f.write(example["story"].strip() + "\n")
-
+    # training
     spm.SentencePieceTrainer.train(
         input=str(tiny_file),
         model_prefix=str(prefix),
@@ -102,7 +105,7 @@ def train_vocab(vocab_size: int) -> None:
     )
 
 
-def process_shard(args: tuple, vocab_size: int) -> None:
+def _process_shard(args: tuple, vocab_size: int) -> None:
     shard_id, shard = args
     tokenizer_model = DATA_CACHE_DIR / f"tok{vocab_size}.model"
     tokenizer = Tokenizer(str(tokenizer_model))
@@ -127,7 +130,7 @@ def pretokenize(vocab_size: int) -> None:
     data_dir = DATA_CACHE_DIR / "TinyStories_all_data"
     shard_filenames = sorted(glob.glob(str(data_dir / "*.json")))
 
-    func = partial(process_shard, vocab_size=vocab_size)
+    func = partial(_process_shard, vocab_size=vocab_size)
     with ProcessPoolExecutor() as executor:
         executor.map(func, enumerate(shard_filenames))
 
@@ -142,39 +145,30 @@ def prepare_dataset(vocab_size: int) -> None:
     print("\nDataset preparation complete!")
 
 
-if __name__ == "__main__":
+
+
+# 测试代码 main 函数
+def main():
+    # ------------------------------
+    # parse command args
+    # ------------------------------
     parser = argparse.ArgumentParser(description="Process TinyStories dataset")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
-
-    download_parser = subparsers.add_parser(
-        "download", help="Download TinyStories dataset"
-    )
-
+    # download
+    download_parser = subparsers.add_parser("download", help="Download TinyStories dataset")
+    # train vocab
     vocab_parser = subparsers.add_parser("train-vocab", help="Train vocabulary")
-    vocab_parser.add_argument(
-        "--vocab-size", type=int, required=True, help="Size of vocabulary to train"
-    )
-
+    vocab_parser.add_argument("--vocab-size", type=int, required=True, help="Size of vocabulary to train")
+    # pre tokenize
     pretok_parser = subparsers.add_parser("pretokenize", help="Pretokenize the dataset")
-    pretok_parser.add_argument(
-        "--vocab-size",
-        type=int,
-        required=True,
-        help="Vocabulary size to use for tokenization",
-    )
-
-    prepare_parser = subparsers.add_parser(
-        "prepare-dataset", help="Run all dataset preparation steps sequentially"
-    )
-    prepare_parser.add_argument(
-        "--vocab-size",
-        type=int,
-        required=True,
-        help="Vocabulary size for training and tokenization",
-    )
-
+    pretok_parser.add_argument("--vocab-size", type=int, required=True, help="Vocabulary size to use for tokenization")
+    # prepare dataset
+    prepare_parser = subparsers.add_parser("prepare-dataset", help="Run all dataset preparation steps sequentially")
+    prepare_parser.add_argument("--vocab-size", type=int, required=True, help="Vocabulary size for training and tokenization")
     args = parser.parse_args()
-
+    # ------------------------------
+    # run func
+    # ------------------------------
     if args.command == "download":
         download()
     elif args.command == "train-vocab":
@@ -185,13 +179,6 @@ if __name__ == "__main__":
         prepare_dataset(args.vocab_size)
     else:
         parser.print_help()
-
-
-
-
-# 测试代码 main 函数
-def main():
-    pass
 
 if __name__ == "__main__":
     main()
