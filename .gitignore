@@ -166,6 +166,7 @@ cython_debug/
 # ---------------------
 .vscode/
 dataset/
+data/
 database/
 downloaded_models/
 checkpoints/
