@@ -60,6 +60,7 @@ parser.add_argument("--local_rank", default=-0, type=int,
                     help="node rank for distributed training")
 args = parser.parse_args()
 
+
 # 初始化分布式训练环境
 torch.distributed.init_process_group(backend="nccl")
 print(f"Use GPU: {args.local_rank}")
@@ -113,10 +114,7 @@ train_loader = torch.utils.data.DataLoader(
 
 
 # 启动训练程序
-"""
-CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=2 distributed_sampler_training.py
-"""
-
+# bash dst.sh
 
 
 
