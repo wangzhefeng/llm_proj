@@ -42,7 +42,7 @@ os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 os.environ["HTTP_PROXY"] = 'http://127.0.0.1:7890'
 
 
-def get_docs(knowledge_lib_path: str = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib", 
+def get_docs(knowledge_lib_path: str = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib", 
              ):
     """
     获取、处理、分割知识库文本数据
@@ -52,7 +52,7 @@ def get_docs(knowledge_lib_path: str = "D:/projects/llms_proj/llm_proj/app/qa_ch
     # ------------------------------
     # 获取 folder_path 下所有文件路径，储存在 file_paths 里
     file_paths = []
-    # folder_path = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib"
+    # folder_path = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib"
     folder_path = knowledge_lib_path
     for root, dirs, files in os.walk(folder_path):
         for file in files:
@@ -91,7 +91,7 @@ def get_docs(knowledge_lib_path: str = "D:/projects/llms_proj/llm_proj/app/qa_ch
     return split_docs
 
 
-def build_vectordb(persist_directory: str = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/vector_db/chroma"):
+def build_vectordb(persist_directory: str = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/vector_db/chroma"):
     # ------------------------------
     # 获取、处理、分割知识库文本数据
     # ------------------------------
@@ -106,7 +106,7 @@ def build_vectordb(persist_directory: str = "D:/projects/llms_proj/llm_proj/app/
     # 构建向量数据库
     # ------------------------------
     # 定义持久化路径
-    # persist_directory = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/vector_db/chroma"
+    # persist_directory = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/vector_db/chroma"
     # 存储向量数据
     vectordb = chroma_save(split_docs, embedding, persist_directory)
 

@@ -47,7 +47,7 @@ def main():
     if sys.platform != "win32":
         doc_path = "/Users/wangzf/llm_proj/app/qa_chain/database/knowledge_lib/prompt_engineering/1. 简介 Introduction.md"
     else:
-        doc_path = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib/prompt_engineering/1. 简介 Introduction.md"
+        doc_path = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib/prompt_engineering/1. 简介 Introduction.md"
     md_pages = load_markdown(doc_path = doc_path)
     # 第一页
     md_page = md_pages[0]

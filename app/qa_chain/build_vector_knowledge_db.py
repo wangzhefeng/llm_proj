@@ -51,7 +51,7 @@ os.environ["HTTP_PROXY"] = 'http://127.0.0.1:7890'
 # ------------------------------
 # 获取 folder_path 下所有文件路径，储存在 file_paths 里
 file_paths = []
-folder_path = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib"
+folder_path = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib"
 for root, dirs, files in os.walk(folder_path):
     for file in files:
         file_path = os.path.join(root, file)
@@ -95,7 +95,7 @@ split_docs = text_splitter.split_documents(texts)
 embedding = M3eEmbeddings()
 
 # 定义持久化路径
-persist_directory = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/vector_db/chroma"
+persist_directory = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/vector_db/chroma"
 
 # 构建向量知识库
 vectordb = Chroma.from_documents(

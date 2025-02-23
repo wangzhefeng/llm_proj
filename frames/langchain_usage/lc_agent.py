@@ -55,7 +55,7 @@ tools = [search]
 # LLM
 # ------------------------------
 llm = LLaMA3_1_LLM(
-    model_name_or_path = "D:/projects/llms_proj/llm_proj/downloaded_models/LLM-Research/Meta-Llama-3.1-8B-Instruct"
+    model_name_or_path = "E:/projects/llms_proj/llm_proj/downloaded_models/LLM-Research/Meta-Llama-3.1-8B-Instruct"
 )
 print(llm("你好"))
 
