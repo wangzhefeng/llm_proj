@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # ***************************************************
-# * File        : models.py
+# * File        : test.py
 # * Author      : Zhefeng Wang
 # * Email       : zfwang7@gmail.com
-# * Date        : 2025-01-02
-# * Version     : 1.0.010223
+# * Date        : 2025-03-30
+# * Version     : 1.0.033014
 # * Description : description
 # * Link        : link
 # * Requirement : 相关模块版本需求(例如: numpy >= 2.1.0)
@@ -17,25 +17,23 @@ __all__ = []
 # python libraries
 import os
 import sys
-ROOT = os.getcwd()
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))
-
-import torch.nn as nn
+ROOT = str(os.getcwd())
+if ROOT not in sys.path:
+    sys.path.append(ROOT)
+import math
+import random
 
 # global variable
 LOGGING_LABEL = __file__.split('/')[-1][:-3]
 
 
-class DeepLab(nn.Module):
+def magic():
+    if random.random() > 0.5:
+        return "✨成功啦✨";
+    else:
+        raise ValueError("Oops")
 
-    def __init__(self):
-        super(DeepLab, self).__init__()
-    
-    def forward(self, x):
-        return x
-
-
+print(magic())
 
 
 
