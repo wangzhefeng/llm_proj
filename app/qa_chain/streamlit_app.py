@@ -77,7 +77,7 @@ def get_vectordb():
     # 定义 Embeddings
     embedding = ZhipuAIEmbeddings()
     # 向量数据库持久化路径
-    persist_directory = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/vector_db/chroma"
+    persist_directory = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/vector_db/chroma"
     # 加载数据库
     vectordb = Chroma(
         persist_directory = persist_directory,

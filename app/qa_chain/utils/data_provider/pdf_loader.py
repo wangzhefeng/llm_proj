@@ -50,7 +50,7 @@ def main():
     if sys.platform != "win32":
         doc_path = "/Users/wangzf/llm_proj/app/qa_chain/database/knowledge_lib/pumkin_book/pumpkin_book.pdf"
     else:
-        doc_path = "D:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib/pumkin_book/pumpkin_book.pdf" 
+        doc_path = "E:/projects/llms_proj/llm_proj/app/qa_chain/database/knowledge_lib/pumkin_book/pumpkin_book.pdf" 
     pdf_pages = load_pdf(doc_path = doc_path) 
     # 第一页
     pdf_page = pdf_pages[1]
