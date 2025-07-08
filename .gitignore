@@ -175,3 +175,4 @@ chroma_data/
 cache/
 finetuned-model/
 logs/
+.DS_Store
